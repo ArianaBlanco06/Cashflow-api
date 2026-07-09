@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/gastos', require('./rutas/gastos.routes'));
 app.use('/api/categorias', require('./rutas/categorias.routes'));
-
+app.use('/api/usuarios', require('./rutas/usuarios.routes'));
 
 app.listen(process.env.PORT, () => {
   console.log(`API corriendo en puerto ${process.env.PORT}`);
