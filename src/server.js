@@ -15,6 +15,8 @@ app.use('/api/categorias', require('./rutas/categorias.routes'));
 app.use('/api/recordatorios', require('./rutas/recordatorios.routes'));
 app.use('/api/metas', require('./rutas/metas.routes'));
 app.use('/api/usuarios', require('./rutas/usuarios.routes'));
+app.use('/api/facturas', require('./rutas/facturas.routes'));
+app.use('/api/clientes', require('./rutas/clientes.routes'));
 
 app.listen(process.env.PORT, () => {
   console.log(`API corriendo en puerto ${process.env.PORT}`);
