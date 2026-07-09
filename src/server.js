@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
   res.send('API de Gestor de Gastos funcionando 🚀');
 });
 
-app.use('/api/usuarios', require('./rutas/usuarios.routes'));
+app.use('/api/gastos', require('./rutas/gastos.routes'));
 
 app.listen(process.env.PORT, () => {
   console.log(`API corriendo en puerto ${process.env.PORT}`);
