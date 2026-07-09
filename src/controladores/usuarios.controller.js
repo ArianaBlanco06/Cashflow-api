@@ -77,3 +77,33 @@ exports.listarUsuarios = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al listar usuarios' });
   }
 };
+
+exports.actualizarUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { nombre, correo, rol, estado } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE usuarios SET nombre=$1, correo=$2, rol=$3, estado=$4
+       WHERE id_usuario=$5 RETURNING id_usuario, nombre, usuario, correo, rol, estado, ultimo_acceso`,
+      [nombre, correo, rol, estado, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+  }
+};
+
+exports.eliminarUsuario = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM usuarios WHERE id_usuario = $1', [id]);
+    res.sendStatus(204);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al eliminar usuario' });
+  }
+};
