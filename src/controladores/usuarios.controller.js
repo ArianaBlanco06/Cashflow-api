@@ -22,6 +22,12 @@ exports.login = async (req, res) => {
       return res.status(401).json({ mensaje: 'Usuario o clave incorrectos' });
     }
 
+    // Actualiza el último acceso
+    await pool.query(
+      'UPDATE usuarios SET ultimo_acceso = NOW() WHERE id_usuario = $1',
+      [user.id_usuario]
+    );
+
     const token = jwt.sign(
       { id: user.id_usuario, rol: user.rol },
       process.env.JWT_SECRET,
@@ -80,13 +86,23 @@ exports.listarUsuarios = async (req, res) => {
 
 exports.actualizarUsuario = async (req, res) => {
   const { id } = req.params;
-  const { nombre, correo, rol, estado } = req.body;
+  const { nombre, correo, rol, estado, clave } = req.body;
   try {
-    const result = await pool.query(
-      `UPDATE usuarios SET nombre=$1, correo=$2, rol=$3, estado=$4
-       WHERE id_usuario=$5 RETURNING id_usuario, nombre, usuario, correo, rol, estado, ultimo_acceso`,
-      [nombre, correo, rol, estado, id]
-    );
+    let result;
+    if (clave && clave.trim() !== '') {
+      const hash = await bcrypt.hash(clave, 10);
+      result = await pool.query(
+        `UPDATE usuarios SET nombre=$1, correo=$2, rol=$3, estado=$4, clave=$5
+         WHERE id_usuario=$6 RETURNING id_usuario, nombre, usuario, correo, rol, estado, ultimo_acceso`,
+        [nombre, correo, rol, estado, hash, id]
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE usuarios SET nombre=$1, correo=$2, rol=$3, estado=$4
+         WHERE id_usuario=$5 RETURNING id_usuario, nombre, usuario, correo, rol, estado, ultimo_acceso`,
+        [nombre, correo, rol, estado, id]
+      );
+    }
     if (result.rows.length === 0) {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
