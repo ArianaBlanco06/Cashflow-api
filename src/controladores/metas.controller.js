@@ -17,6 +17,20 @@ exports.listarMetas = async (req, res) => {
 exports.crearMeta = async (req, res) => {
   const { monto_meta, mes, anio, id_usuario } = req.body;
   try {
+    // Si ya existe una meta para ese usuario/mes/año, actualizarla
+    const existente = await pool.query(
+      'SELECT * FROM metas_mensuales WHERE id_usuario = $1 AND mes = $2 AND anio = $3',
+      [id_usuario, mes, anio]
+    );
+
+    if (existente.rows.length > 0) {
+      const result = await pool.query(
+        'UPDATE metas_mensuales SET monto_meta = $1 WHERE id_meta = $2 RETURNING *',
+        [monto_meta, existente.rows[0].id_meta]
+      );
+      return res.json(result.rows[0]);
+    }
+
     const result = await pool.query(
       `INSERT INTO metas_mensuales (monto_meta, mes, anio, id_usuario)
        VALUES ($1,$2,$3,$4) RETURNING *`,
